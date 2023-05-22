@@ -9,7 +9,11 @@ TITLE = 'touch'
 FULLSCREEN = False
 SQUARE_SIZE = 53
 FONT_SIZE = 80
+FONT_SIZE_JP = 60
 STYLE = ''
+SEQUENCE = list('012345678')
+SEQUENCE_STYLE = ''
+FONT_PATH_JP = 'res/NotoSansJP-VariableFont_wght.ttf'
 
 
 def colorize(surface, color):
@@ -17,6 +21,17 @@ def colorize(surface, color):
         for y in range(surface.get_height()):
             color.a = surface.get_at((x, y)).a
             surface.set_at((x, y), color)
+
+def is_japanese(c):
+    n = ord(c)
+    if (0x3040 <= n <= 0x30FF) \
+            or (0x3400 <= n <= 0x4DBF) \
+            or (0x4E00 <= n <= 0x9FFF) \
+            or (0xF900 <= n <= 0xFAFF) \
+            or (0xFF66 <= n <= 0xFF9F):
+        return True
+    else:
+        return False
 
 
 class Grid:
@@ -44,21 +59,26 @@ class Grid:
 
         self.s = pygame.Surface((self.sz, self.sz), pygame.SRCALPHA)
 
-        if not STYLE:
-            pygame.draw.rect(
-                self.s, FG, (0, 0, self.sz, self.sz)
-            )
-        elif STYLE.startswith('Char'):
-            font = pygame.font.Font(None, FONT_SIZE)
+        c = STYLE.replace('Char', '')
+
+        if STYLE.startswith('Char') and len(c) == 1:
+            if is_japanese(c):
+                font = pygame.font.Font(FONT_PATH_JP, FONT_SIZE_JP)
+            else:
+                font = pygame.font.Font(None, FONT_SIZE)
             text = font.render(STYLE.replace('Char', ''), True, FG)
             text_rect = text.get_rect()
             text_rect.center = self.sz//2, self.sz//2
             self.s.blit(text, text_rect)
-        else:
+        elif STYLE.endswith('.png'):
             im = pygame.image.load(STYLE)
             im = pygame.transform.scale(im, (self.sz, self.sz))
             self.s.blit(im, (0, 0))
             colorize(self.s, pygame.Color(*FG))
+        else:
+            pygame.draw.rect(
+                self.s, FG, (0, 0, self.sz, self.sz)
+            )
 
 
     def get_grid(self, n):
@@ -75,7 +95,10 @@ class Grid:
 class Frame:
     def __init__(self):
         self.s = pygame.Surface((WIDTH, HEIGHT))
-        self.font = pygame.font.Font(None, FONT_SIZE)
+        if SEQUENCE_STYLE == 'hiragana' or SEQUENCE_STYLE == 'katakana':
+            self.font = pygame.font.Font(FONT_PATH_JP, FONT_SIZE_JP)
+        else:
+            self.font = pygame.font.Font(None, FONT_SIZE)
 
     def w(self, s, x, y):
         text = self.font.render(str(s), True, FG)
@@ -88,7 +111,7 @@ class Frame:
 
         if state.n == len(state.l):
             for n, i in enumerate(state.l):
-                self.w(n, i[0] + state.grid.sz / 2, i[1] + state.grid.sz / 2)
+                self.w(SEQUENCE[n], i[0] + state.grid.sz / 2, i[1] + state.grid.sz / 2)
         else:
             for i in state.l:
                 self.s.blit(state.grid.s, i)
@@ -185,28 +208,37 @@ class Game:
 if __name__ == '__main__':
     import sys
     for i in sys.argv[1:]:
-        if i == '-help':
-            print('Usage: python touch.py [-ARG][N?]')
-            print('fs   fullscreen')
-            print('w    width')
-            print('h    height')
-            print('z    zoom')
-            exit()
-        if i == '-fs':
+        c = i[0]
+        s = i[1:]
+        if 'f' == c:
             FULLSCREEN = True
-        elif '-w' in i:
-            WIDTH = int(i[2:])
-        elif '-h' in i:
-            HEIGHT = int(i[2:])
-        elif '-z' in i:
-            n = float(i[2:])
+        if 'w' == c:
+            s = s.split('x')
+            WIDTH = int(s[0])
+            HEIGHT = int(s[1])
+        if 'z' == c:
+            n = float(s)
             FONT_SIZE = int(FONT_SIZE * n)
+            FONT_SIZE_JP = int(FONT_SIZE_JP * n)
             SQUARE_SIZE = int(SQUARE_SIZE * n)
-        elif '-bg' in i:
-            BG = [int(i) for i in i[3:].split(',')]
-        elif '-fg' in i:
-            FG = [int(i) for i in i[3:].split(',')]
-        elif '-s' in i:
-            STYLE = i[2:]
+        if 'b' == c:
+            BG = [int(i) for i in s.split(',')]
+        if 'd' == c:
+            FG = [int(i) for i in s.split(',')]
+        if 's' == c:
+            STYLE = s
+        if 'e' == c:
+            if s == 'ascii_lowercase':
+                SEQUENCE = list('abcdefgh')
+            elif s == 'ascii_uppercase':
+                SEQUENCE = list('ABCDEFGH')
+            elif s == 'hiragana':
+                SEQUENCE = list('あいうえおかきくけ')
+                SEQUENCE_STYLE = s
+            elif s == 'katakana':
+                SEQUENCE = list('アイウエオカキクケ')
+                SEQUENCE_STYLE = s
+            elif len(s) > 9:
+                SEQUENCE = list(s)
     import pygame
     Game().run()
