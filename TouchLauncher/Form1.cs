@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Windows.Forms;
 
 namespace TouchLauncher
@@ -9,6 +10,9 @@ namespace TouchLauncher
         public Form1()
         {
             InitializeComponent();
+            if (Directory.Exists("res"))
+                foreach (string i in Directory.EnumerateFiles("res", "*.png"))
+                    this.comboBox2.Items.Add(i);
         }
 
         private String get_rgb(PictureBox p)
@@ -25,8 +29,8 @@ namespace TouchLauncher
             s += " -z" + textBox1.Text;
             s += " -bg" + get_rgb(pictureBox1);
             s += " -fg" + get_rgb(pictureBox2);
-            if (comboBox1.Text != "Default")
-                s += " -sres/" + comboBox2.Text + ".png";
+            if (comboBox2.Text != "Default")
+                s += " -s" + comboBox2.Text;
             Process.Start("pythonw.exe", "touch.pyw " + s);
             Application.Exit();
         }

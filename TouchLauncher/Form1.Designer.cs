@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.IO;
 
 namespace TouchLauncher
 {
@@ -162,8 +163,6 @@ namespace TouchLauncher
             this.comboBox2.FormattingEnabled = true;
             this.comboBox2.Items.AddRange(new object[] {
             "Default",
-            "Checker1",
-            "Checker2",
             "Char?"});
             this.comboBox2.Location = new System.Drawing.Point(53, 35);
             this.comboBox2.Name = "comboBox2";
@@ -196,7 +195,6 @@ namespace TouchLauncher
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
         #endregion
