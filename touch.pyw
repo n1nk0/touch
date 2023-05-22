@@ -13,7 +13,7 @@ FONT_SIZE_JP = 60
 STYLE = ''
 SEQUENCE = list('012345678')
 SEQUENCE_STYLE = ''
-FONT_PATH_JP = 'res/NotoSansJP-VariableFont_wght.ttf'
+FONT_PATH_JP = 'res/NotoSansJP-ExtraLight.ttf'
 
 
 def colorize(surface, color):
